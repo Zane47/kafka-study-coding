@@ -1,2 +1,1 @@
-# kafka-study-coding
-慕课网kafka课程源码学习
+代码来源：https://coding.imooc.com/class/434.html
