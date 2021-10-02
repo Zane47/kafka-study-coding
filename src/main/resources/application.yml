@@ -14,6 +14,7 @@ template:
 wechat:
   kafka:
     bootstrap_servers: "192.168.220.128:9092"
+    # 只发一次, 最严格模式
     acks_config: "all"
     partitioner_class: "com.imooc.jiangzh.kafka.producer.SamplePartition"
 

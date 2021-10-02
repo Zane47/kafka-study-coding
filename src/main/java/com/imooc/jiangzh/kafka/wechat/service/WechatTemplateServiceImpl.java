@@ -16,13 +16,14 @@ import java.util.concurrent.Future;
 
 @Slf4j
 @Service
-public class WechatTemplateServiceImpl implements WechatTemplateService{
+public class WechatTemplateServiceImpl implements WechatTemplateService {
 
     @Autowired
     private WechatTemplateProperties properties;
 
     @Autowired
     private Producer producer;
+
     /*
         获取目前active为true的调查问卷模板
      */
@@ -45,10 +46,12 @@ public class WechatTemplateServiceImpl implements WechatTemplateService{
         // 发送Kafka数据
         String templateId = reportInfo.getString("templateId");
         JSONArray reportData = reportInfo.getJSONArray("result");
-
-        // 如果templateid相同，后续在统计分析时，可以考虑将相同的id的内容放入同一个partition，便于分析使用
-        ProducerRecord<String,Object> record =
-                new ProducerRecord<>(topicName,templateId,reportData);
+        // 很多个人都发送, 可能出现id,key冲突的情况.
+        // 1.手动变成不一样的
+        // 2.不变也问题不大. 如果templateid相同，后续在统计分析时，可以考虑将相同的id的内容放入同一个partition，便于分析使用,
+        // 消费的时候就全是同一个模板里面的数据
+        ProducerRecord<String, Object> record =
+                new ProducerRecord<>(topicName, templateId, reportData);
 
         /*
             1、Kafka Producer是线程安全的，建议多线程复用，如果每个线程都创建，出现大量的上下文切换或争抢的情况，影响Kafka效率
@@ -58,9 +61,9 @@ public class WechatTemplateServiceImpl implements WechatTemplateService{
 
             3、ack - all， kafka层面上就已经有了只有一次的消息投递保障，但是如果想真的不丢数据，最好自行处理异常
          */
-        try{
+        try {
             producer.send(record);
-        }catch (Exception e){
+        } catch (Exception e) {
             // 将数据加入重发队列， redis，es，...
         }
 
@@ -69,9 +72,9 @@ public class WechatTemplateServiceImpl implements WechatTemplateService{
     @Override
     public JSONObject templateStatistics(String templateId) {
         // 判断数据结果获取类型
-        if(properties.getTemplateResultType() == 0){ // 文件获取
+        if (properties.getTemplateResultType() == 0) { // 文件获取
             return FileUtils.readFile2JsonObject(properties.getTemplateResultFilePath()).get();
-        }else{
+        } else {
             // DB ..
         }
         return null;
