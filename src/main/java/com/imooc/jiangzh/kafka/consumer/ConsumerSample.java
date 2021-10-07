@@ -12,11 +12,12 @@ import java.time.Duration;
 import java.util.*;
 
 public class ConsumerSample {
-    private final static String TOPIC_NAME="jiangzh-topic";
+    private final static String TOPIC_NAME = "jiangzh-topic";
+
     public static void main(String[] args) {
-        helloworld();
+//        helloworld();
         // 手动提交offset
-//        commitedOffset();
+        commitedOffset();
         // 手动对每个Partition进行提交
 //        commitedOffsetWithPartition();
         // 手动订阅某个或某些分区，并提交offset
@@ -30,10 +31,10 @@ public class ConsumerSample {
     }
 
 
-    /*
+    /**
         HelloWorld 携带SSL
      */
-    private static void helloworldWithSSL(){
+    private static void helloworldWithSSL() {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", "192.168.220.128:8989");
         props.setProperty("group.id", "test");
@@ -42,26 +43,27 @@ public class ConsumerSample {
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-        props.put("security.protocol","SSL");
-        props.put("ssl.endpoint.identification.algorithm","");
-        props.put("ssl.truststore.location","client.truststore.jks");
-        props.put("ssl.truststore.password","jiangzh");
+        props.put("security.protocol", "SSL");
+        props.put("ssl.endpoint.identification.algorithm", "");
+        props.put("ssl.truststore.location", "client.truststore.jks");
+        props.put("ssl.truststore.password", "jiangzh");
 
-        KafkaConsumer<String,String> consumer = new KafkaConsumer(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer(props);
         // 消费订阅哪一个Topic或者几个Topic
         consumer.subscribe(Arrays.asList(TOPIC_NAME));
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
-            for (ConsumerRecord<String, String> record : records)
+            for (ConsumerRecord<String, String> record : records) {
                 System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
-                        record.partition(),record.offset(), record.key(), record.value());
+                        record.partition(), record.offset(), record.key(), record.value());
+            }
         }
     }
 
-    /*
+    /**
         工作里这种用法，有，但是不推荐
      */
-    private static void helloworld(){
+    private static void helloworld() {
         Properties props = new Properties();
         props.setProperty("bootstrap.servers", "192.168.220.128:9092");
         props.setProperty("group.id", "test");
@@ -70,18 +72,19 @@ public class ConsumerSample {
         props.setProperty("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.setProperty("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
 
-        KafkaConsumer<String,String> consumer = new KafkaConsumer(props);
+        KafkaConsumer<String, String> consumer = new KafkaConsumer(props);
         // 消费订阅哪一个Topic或者几个Topic
         consumer.subscribe(Arrays.asList(TOPIC_NAME));
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
-            for (ConsumerRecord<String, String> record : records)
+            for (ConsumerRecord<String, String> record : records) {
                 System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
-                        record.partition(),record.offset(), record.key(), record.value());
+                        record.partition(), record.offset(), record.key(), record.value());
+            }
         }
     }
 
-    /*
+    /**
         手动提交offset
      */
     private static void commitedOffset() {
@@ -112,7 +115,7 @@ public class ConsumerSample {
     }
 
 
-    /*
+    /**
         手动提交offset,并且手动控制partition
      */
     private static void commitedOffsetWithPartition() {
@@ -128,27 +131,27 @@ public class ConsumerSample {
         // 消费订阅哪一个Topic或者几个Topic
         consumer.subscribe(Arrays.asList(TOPIC_NAME));
         while (true) {
-           ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
-           // 每个partition单独处理
-           for(TopicPartition partition : records.partitions()){
-               List<ConsumerRecord<String, String>> pRecord = records.records(partition);
-               for (ConsumerRecord<String, String> record : pRecord) {
-                   System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
-                           record.partition(), record.offset(), record.key(), record.value());
+            ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
+            // 每个partition单独处理
+            for (TopicPartition partition : records.partitions()) {
+                List<ConsumerRecord<String, String>> pRecord = records.records(partition);
+                for (ConsumerRecord<String, String> record : pRecord) {
+                    System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
+                            record.partition(), record.offset(), record.key(), record.value());
 
-               }
-               long lastOffset = pRecord.get(pRecord.size() -1).offset();
-               // 单个partition中的offset，并且进行提交
-               Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
-               offset.put(partition,new OffsetAndMetadata(lastOffset+1));
-               // 提交offset
-               consumer.commitSync(offset);
-               System.out.println("=============partition - "+ partition +" end================");
-           }
+                }
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
+                // 单个partition中的offset，并且进行提交
+                Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
+                // 提交offset
+                consumer.commitSync(offset);
+                System.out.println("=============partition - " + partition + " end================");
+            }
         }
     }
 
-    /*
+    /**
         手动提交offset,并且手动控制partition,更高级
      */
     private static void commitedOffsetWithPartition2() {
@@ -175,26 +178,26 @@ public class ConsumerSample {
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
             // 每个partition单独处理
-            for(TopicPartition partition : records.partitions()){
+            for (TopicPartition partition : records.partitions()) {
                 List<ConsumerRecord<String, String>> pRecord = records.records(partition);
                 for (ConsumerRecord<String, String> record : pRecord) {
                     System.out.printf("patition = %d , offset = %d, key = %s, value = %s%n",
                             record.partition(), record.offset(), record.key(), record.value());
 
                 }
-                long lastOffset = pRecord.get(pRecord.size() -1).offset();
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
                 // 单个partition中的offset，并且进行提交
                 Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
-                offset.put(partition,new OffsetAndMetadata(lastOffset+1));
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
                 // 提交offset
                 consumer.commitSync(offset);
-                System.out.println("=============partition - "+ partition +" end================");
+                System.out.println("=============partition - " + partition + " end================");
             }
         }
     }
 
 
-    /*
+    /**
         手动指定offset的起始位置，及手动提交offset
      */
     private static void controlOffset() {
@@ -230,26 +233,26 @@ public class ConsumerSample {
 
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
             // 每个partition单独处理
-            for(TopicPartition partition : records.partitions()){
+            for (TopicPartition partition : records.partitions()) {
                 List<ConsumerRecord<String, String>> pRecord = records.records(partition);
                 for (ConsumerRecord<String, String> record : pRecord) {
                     System.err.printf("patition = %d , offset = %d, key = %s, value = %s%n",
                             record.partition(), record.offset(), record.key(), record.value());
 
                 }
-                long lastOffset = pRecord.get(pRecord.size() -1).offset();
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
                 // 单个partition中的offset，并且进行提交
                 Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
-                offset.put(partition,new OffsetAndMetadata(lastOffset+1));
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
                 // 提交offset
                 consumer.commitSync(offset);
-                System.out.println("=============partition - "+ partition +" end================");
+                System.out.println("=============partition - " + partition + " end================");
             }
         }
     }
 
 
-    /*
+    /**
         流量控制 - 限流
      */
     private static void controlPause() {
@@ -268,12 +271,12 @@ public class ConsumerSample {
         TopicPartition p1 = new TopicPartition(TOPIC_NAME, 1);
 
         // 消费订阅某个Topic的某个分区
-        consumer.assign(Arrays.asList(p0,p1));
+        consumer.assign(Arrays.asList(p0, p1));
         long totalNum = 40;
         while (true) {
             ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(10000));
             // 每个partition单独处理
-            for(TopicPartition partition : records.partitions()){
+            for (TopicPartition partition : records.partitions()) {
                 List<ConsumerRecord<String, String>> pRecord = records.records(partition);
                 long num = 0;
                 for (ConsumerRecord<String, String> record : pRecord) {
@@ -286,26 +289,26 @@ public class ConsumerSample {
                         4、当令牌桶中的令牌足够， 则将consumer置为resume状态
                      */
                     num++;
-                    if(record.partition() == 0){
-                        if(num >= totalNum){
+                    if (record.partition() == 0) {
+                        if (num >= totalNum) {
                             consumer.pause(Arrays.asList(p0));
                         }
                     }
 
-                    if(record.partition() == 1){
-                        if(num == 40){
+                    if (record.partition() == 1) {
+                        if (num == 40) {
                             consumer.resume(Arrays.asList(p0));
                         }
                     }
                 }
 
-                long lastOffset = pRecord.get(pRecord.size() -1).offset();
+                long lastOffset = pRecord.get(pRecord.size() - 1).offset();
                 // 单个partition中的offset，并且进行提交
                 Map<TopicPartition, OffsetAndMetadata> offset = new HashMap<>();
-                offset.put(partition,new OffsetAndMetadata(lastOffset+1));
+                offset.put(partition, new OffsetAndMetadata(lastOffset + 1));
                 // 提交offset
                 consumer.commitSync(offset);
-                System.out.println("=============partition - "+ partition +" end================");
+                System.out.println("=============partition - " + partition + " end================");
             }
         }
     }

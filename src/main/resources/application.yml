@@ -1,6 +1,8 @@
 server:
+  #https默认
   port: 443
   ssl:
+    # ssl文件
     key-store: 3702162_wechat.coding-jiangzh.com.pfx
     key-store-password: 49Jk65Pi
 
